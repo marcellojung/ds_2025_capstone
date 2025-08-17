@@ -1,0 +1,6 @@
+# 분 시 일 월 요일 사용자  명령
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# 매일 03:05 KST CSV 적재
+5 3 * * * root . /etc/profile; python /app/load_csv.py --csv "$CSV_PATH" >> /var/log/cron.log 2>&1

@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    container_name: ncs_pg
+    environment:
+      POSTGRES_DB: jobs
+      POSTGRES_USER: jobs_admin
+      POSTGRES_PASSWORD: admin_pw
+      TZ: Asia/Seoul
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/00-schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobs_admin -d jobs"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  loader:
+    build: .
+    container_name: ncs_loader
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: jobs
+      PGUSER: jobs_loader
+      PGPASSWORD: loader_pw
+      CSV_PATH: /data/saramin.csv
+      TZ: Asia/Seoul
+    volumes:
+      - ./requirements.txt:/app/requirements.txt:ro
+      - ./load_csv.py:/app/load_csv.py:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+      - ./cronjob:/etc/cron.d/loader-cron:ro
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
