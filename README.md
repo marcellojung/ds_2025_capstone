@@ -29,3 +29,8 @@ docker compose up -d --build
 
 docker logs -f ncs_loader
 ```
+
+## toDo
+ - 파일 전처리
+ - NCS 라벨링
+ - ipynb -> py 변경 
